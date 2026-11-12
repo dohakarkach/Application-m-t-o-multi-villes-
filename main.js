@@ -43,7 +43,10 @@ fetch (url,{
     .then(meteoData=>{
         let daily = meteoData.daily;
       daily.time.forEach ((date,index)=>{ 
-    
+        let maxTemp = daily.temperature_2m_max[index];
+        let minTemp = daily.temperature_2m_min[index];
+        let forecastCode = daily.weather_code[index];
+        let forecastDesc = WEATHER_CODES[forecastCode];
     let carte = document.createElement("div");
     let titre = document.createElement("h1")
     titre.textContent = date;
