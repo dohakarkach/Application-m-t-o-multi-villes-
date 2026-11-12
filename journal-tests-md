@@ -1,0 +1,31 @@
+# Journal des tests manuels
+
+## Test 1 — Affichage du bouton Réessayer
+- **Action :** Afficher le bouton depuis la console.
+- **Résultat attendu :** Le bouton devient visible.
+- **Résultat obtenu :** Le bouton est apparu.
+- **Statut :** Réussi.
+
+## Test 2 — Recherche d'une ville inconnue
+- **Action :** Rechercher `Xyzabc123`.
+- **Résultat attendu :** Afficher le message « Ville introuvable ».
+- **Résultat obtenu :** Le message « Ville introuvable » s'est affiché.
+- **Statut :** Réussi.
+
+## Test 3 — Erreur réseau
+- **Action :** Passer le navigateur en mode Offline et lancer une recherche.
+- **Résultat attendu :** Afficher un message d'erreur et le bouton Réessayer.
+- **Résultat obtenu :** Le message « Impossible de récupérer les données météo. » et le bouton Réessayer sont apparus.
+- **Statut :** Réussi.
+
+## Test 4 — Quota dépassé (HTTP 429)
+- **Action :** Simuler une réponse HTTP 429 temporairement avec `if (true)`.
+- **Résultat attendu :** Afficher le message de quota et le bouton Réessayer.
+- **Résultat obtenu :** Le message de quota et le bouton Réessayer sont apparus.
+- **Statut :** Réussi.
+
+## Test 5 — Bouton Réessayer
+- **Action :** Repasser en ligne puis cliquer sur Réessayer.
+- **Résultat attendu :** Relancer automatiquement la recherche de la dernière ville.
+- **Résultat obtenu :** Les informations météo de Oujda sont apparues.
+- **Statut :** Réussi.
