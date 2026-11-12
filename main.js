@@ -72,7 +72,12 @@ fetch (url,{
     });
         
       })
-       
+        let maxTemp = daily.temperature_2m_max[index];
+        let minTemp = daily.temperature_2m_min[index];
+        let forecastCode = daily.weather_code[index];
+        let forecastDesc = WEATHER_CODES[forecastCode];
+       let  weather = meteoData. current.weather_code;
+       let desc =  WEATHER_CODES[weather];
         let temperature = meteoData.current.temperature_2m;
         let humidity  = meteoData.current.relative_humidity_2m;
         let speed = meteoData .current.wind_speed_10m;
