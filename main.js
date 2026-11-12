@@ -38,7 +38,8 @@ let message = document.getElementById("message");
 let resultats = document.getElementById("resultats");
 let ville = document.getElementById("ville");
 let chargement = document.getElementById("chargement");
-
+let reessayer = document.getElementById("reessayer");
+let derniereVille = "";
 formRecherche.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -48,17 +49,25 @@ formRecherche.addEventListener("submit", async (event) => {
     }
 
     let nomVille = ville.value.trim();
-
+derniereVille = nomVille;
     message.textContent = "";
     resultats.replaceChildren();
+    reessayer.hidden = true; 
     chargement.hidden = false;
 
     try {
-        
+       
         let url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomVille)}&count=1&language=fr&format=json`;
 
         let response = await fetch(url);
+if (response .status === 429){
+  message.textContent = "Nombre maximum de requêtes atteint. Réessayez plus tard.";
+ reessayer.hidden = false; 
+  return;
+  
+}
 
+        
         if (!response.ok) {
             throw new Error("Erreur de recherche de ville");
         }
@@ -78,7 +87,12 @@ formRecherche.addEventListener("submit", async (event) => {
         let url2 = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
 
         let response2 = await fetch(url2);
-
+if (response2 .status === 429){
+  message.textContent = "Nombre maximum de requêtes atteint. Réessayez plus tard.";
+ reessayer.hidden = false; 
+  return;
+ 
+}
         if (!response2.ok) {
             throw new Error("Erreur de récupération météo");
         }
@@ -148,9 +162,12 @@ wind.textContent = "Vitesse du vent : " +
             let minTemp = daily.temperature_2m_min[index];
 
             let forecastCode = daily.weather_code[index];
-            let forecastDesc = WEATHER_CODES[forecastCode] || {
-                label: "Conditions inconnues",
-                icon: "❔"
+            let forecastDesc = WEATHER_CODES[forecastCode] 
+             if( forecastDesc === undefined){
+              forecastDesc = {
+        label: "Conditions inconnues",
+        icon: "❔"
+    }
             };
 
             let carteJour = document.createElement("div");
@@ -189,8 +206,12 @@ min.textContent = "Température minimale : " +
     } catch (error) {
         message.textContent = "Impossible de récupérer les données météo.";
         console.log(error);
-
+reessayer.hidden = false;
     } finally {
         chargement.hidden = true;
     }
 });
+reessayer.addEventListener("click",()=>{
+ville.value = derniereVille;
+formRecherche.requestSubmit();
+})
