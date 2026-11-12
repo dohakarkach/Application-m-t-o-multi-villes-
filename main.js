@@ -101,7 +101,17 @@ let icon = document.createElement("p");
 icon.textContent = desc.icon;
 carte.appendChild(icon);
 carte.appendChild(description);
+let max = document.createElement("p");
+max.textContent = "Température maximale : " + maxTemp + "°C";
+carte.appendChild(max);
 
+let min = document.createElement("p");
+min.textContent = "Température minimale : " + minTemp + "°C";
+carte.appendChild(min);
+let prevision = document.createElement("p");
+prevision.textContent = "Prévision : " + forecastDesc.label;
+carte.appendChild(prevision);
+    resultats.replaceChildren(carte);
 
     })
 })
