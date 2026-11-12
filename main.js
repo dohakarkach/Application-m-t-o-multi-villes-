@@ -31,7 +31,7 @@ fetch (url,{
 
     console.log(data.results[0].longitude);
       console.log(data.results[0].latitude);
-    let url2 = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,timezone=auto`;
+    let url2 = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
      return fetch(url2,{
         method : "GET"
     })
