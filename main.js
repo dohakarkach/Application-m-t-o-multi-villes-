@@ -32,124 +32,165 @@ const WEATHER_CODES = {
 
 
 
+
 let formRecherche = document.getElementById("form-recherche");
 let message = document.getElementById("message");
 let resultats = document.getElementById("resultats");
 let ville = document.getElementById("ville");
 let chargement = document.getElementById("chargement");
-formRecherche.addEventListener("submit",(event)=>{
-event.preventDefault();
-if(ville.value.trim() === ""){
-    message.textContent ="Veuillez entrer une ville.";
-return;
-}
-let nomVille = ville.value.trim();
-let url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomVille)}&count=1&language=fr&format=json`;
-chargement.hidden = false; //visible
-fetch (url,{
-    method:"GET"
-})
-.then (response=>{
-    // console.log(Response);
-    return response.json();
-})
-.then(data =>{
 
-    let latitude = data.results[0].latitude;
-    let longitude = data.results[0].longitude
+formRecherche.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-    console.log(data.results[0].longitude);
-      console.log(data.results[0].latitude);
-    let url2 = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
-     return fetch(url2,{
-        method : "GET"
-    })
-    .then(  (response) => {
-        return response.json();
+    if (ville.value.trim() === "") {
+        message.textContent = "Veuillez entrer une ville.";
+        return;
+    }
+
+    let nomVille = ville.value.trim();
+
+    message.textContent = "";
+    resultats.replaceChildren();
+    chargement.hidden = false;
+
+    try {
         
-         
-    })
-    .then(meteoData=>{
-        let daily = meteoData.daily;
-      daily.time.forEach ((date,index)=>{ 
-        let maxTemp = daily.temperature_2m_max[index];
-        let minTemp = daily.temperature_2m_min[index];
-        let forecastCode = daily.weather_code[index];
-        let forecastDesc = WEATHER_CODES[forecastCode];
-    let carte = document.createElement("div");
-    let titre = document.createElement("h1")
-    titre.textContent = date;
-    carte.appendChild(titre);
-  let icon = document.createElement("p");
-        icon.textContent = forecastDesc.icon;
+        let url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomVille)}&count=1&language=fr&format=json`;
+
+        let response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Erreur de recherche de ville");
+        }
+
+        let data = await response.json();
+
+        if (!data.results || data.results.length === 0) {
+            message.textContent = "Ville introuvable.";
+            return;
+        }
+
+       
+        let latitude = data.results[0].latitude;
+        let longitude = data.results[0].longitude;
+
+
+        let url2 = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`;
+
+        let response2 = await fetch(url2);
+
+        if (!response2.ok) {
+            throw new Error("Erreur de récupération météo");
+        }
+
+        let meteoData = await response2.json();
+
+       
+        let current = meteoData.current;
+
+        let temperature = current.temperature_2m;
+        let humidity = current.relative_humidity_2m;
+        let speed = current.wind_speed_10m;
+
+        let weather = current.weather_code;
+        let desc = WEATHER_CODES[weather] ;
+        if( desc === undefined){
+              desc = {
+        label: "Conditions inconnues",
+        icon: "❔"
+    }
+        }
+        
+      
+
+        let carte = document.createElement("div");
+
+        let titre = document.createElement("h2");
+        titre.textContent = nomVille;
+        carte.appendChild(titre);
+
+        let icon = document.createElement("p");
+        icon.textContent = desc.icon;
         carte.appendChild(icon);
 
         let description = document.createElement("p");
-        description.textContent = forecastDesc.label;
+        description.textContent = desc.label;
         carte.appendChild(description);
 
-        let max = document.createElement("p");
-        max.textContent = "Température maximale : " + maxTemp + "°C";
-        carte.appendChild(max);
+        let temp = document.createElement("p");
+temp.textContent = "Température : " +
+    (temperature != null ? temperature + "°C" : "Donnée indisponible");
+        carte.appendChild(temp);
 
-        let min = document.createElement("p");
-        min.textContent = "Température minimale : " + minTemp + "°C";
-        carte.appendChild(min);
+        let humd = document.createElement("p");
+humd.textContent = "Humidité : " +
+    (humidity != null ? humidity + "%" : "Donnée indisponible");
+
+
+        carte.appendChild(humd);
+
+        let wind = document.createElement("p");
+wind.textContent = "Vitesse du vent : " +
+    (speed != null ? speed + " km/h" : "Donnée indisponible");
+        carte.appendChild(wind);
 
         resultats.appendChild(carte);
 
-    });
-        
-      })
-        let maxTemp = daily.temperature_2m_max[index];
-        let minTemp = daily.temperature_2m_min[index];
-        let forecastCode = daily.weather_code[index];
-        let forecastDesc = WEATHER_CODES[forecastCode];
-       let  weather = meteoData. current.weather_code;
-       let desc =  WEATHER_CODES[weather];
-        let temperature = meteoData.current.temperature_2m;
-        let humidity  = meteoData.current.relative_humidity_2m;
-        let speed = meteoData .current.wind_speed_10m;
-        console.log(temperature);
-       let carte = document.createElement("div");
-       let titre = document.createElement("h1");
-       titre.textContent = nomVille ;
-       carte.appendChild(titre);
-    let temp = document.createElement("p");
-temp.textContent = "temperature :" + temperature + "°C" ;
-carte.appendChild(temp);
-let humd = document.createElement("p");
-humd.textContent = "Humidité :" + humidity + "%";
-carte.appendChild(humd);
-let wind = document.createElement("p");
-wind.textContent = "Vitesse du vent :" + speed + "km/h";
-carte.appendChild(wind)
-let description = document.createElement("p");
-description.textContent = desc.label;
-let icon = document.createElement("p");
-icon.textContent = desc.icon;
-carte.appendChild(icon);
-carte.appendChild(description);
-let max = document.createElement("p");
-max.textContent = "Température maximale : " + maxTemp + "°C";
-carte.appendChild(max);
 
-let min = document.createElement("p");
-min.textContent = "Température minimale : " + minTemp + "°C";
-carte.appendChild(min);
-let prevision = document.createElement("p");
-prevision.textContent = "Prévision : " + forecastDesc.label;
-carte.appendChild(prevision);
-    resultats.replaceChildren(carte);
+        let daily = meteoData.daily;
 
-    })
-})
-.catch(error => {
-    message.textContent = "Impossible de récupérer les données météo.";
-    console.log( error);
-})
+        daily.time.forEach((date, index) => {
+            // console.log("date :",date);
+            // console.log("index :",index);
+            
+            
+            let maxTemp = daily.temperature_2m_max[index];
+            let minTemp = daily.temperature_2m_min[index];
 
-.finally(() => {
-    chargement.hidden = true; //invisible
+            let forecastCode = daily.weather_code[index];
+            let forecastDesc = WEATHER_CODES[forecastCode] || {
+                label: "Conditions inconnues",
+                icon: "❔"
+            };
+
+            let carteJour = document.createElement("div");
+
+            let titreJour = document.createElement("h2");
+           let dateFormatee = new Date(date + "T12:00:00").toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
 });
 
+titreJour.textContent = dateFormatee;
+            carteJour.appendChild(titreJour);
+
+            let iconJour = document.createElement("p");
+            iconJour.textContent = forecastDesc.icon;
+            carteJour.appendChild(iconJour);
+
+            let descriptionJour = document.createElement("p");
+            descriptionJour.textContent = forecastDesc.label;
+            carteJour.appendChild(descriptionJour);
+
+            let max = document.createElement("p");
+            let min = document.createElement("p");
+max.textContent = "Température maximale : " +
+    (maxTemp != null ? maxTemp + "°C" : "Donnée indisponible");
+            carteJour.appendChild(max);
+
+min.textContent = "Température minimale : " +
+    (minTemp != null ? minTemp + "°C" : "Donnée indisponible");
+            carteJour.appendChild(min);
+
+            resultats.appendChild(carteJour);
+        });
+
+    } catch (error) {
+        message.textContent = "Impossible de récupérer les données météo.";
+        console.log(error);
+
+    } finally {
+        chargement.hidden = true;
+    }
+});
